@@ -2,7 +2,7 @@ from graphics import *
 
 
 class Cell:
-    def __init__(self, window):
+    def __init__(self, window=None):
         self._win = window
         self.has_left_wall = True
         self.has_right_wall = True
@@ -15,6 +15,8 @@ class Cell:
         
     
     def draw(self, x1, y1, x2, y2):
+        if self._win is None:
+            return
         self._x1 = x1
         self._y1 = y1
         self._x2 = x2
@@ -34,6 +36,8 @@ class Cell:
             
             
     def draw_move(self, to_cell, undo=False):
+        if self._win is None:
+            return
         if undo:
             color = "gray"
         else:
