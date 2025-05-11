@@ -1,8 +1,10 @@
 from cell import *
 import time
+import random
 
 class Maze():
-    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, winow=None):
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, winow=None, seed=None):
+        print("starting maze generation ...")
         self.x1 = x1
         self.y1 = y1
         self.num_rows = num_rows
@@ -10,7 +12,14 @@ class Maze():
         self.cell_size_x = cell_size_x
         self.cell_size_y = cell_size_y
         self._win = winow
+        
+        if seed is not None:
+            random.seed(seed)
+
         self._create_cells()
+        self._break_entrance_and_exit()
+        self.break_walls(0, 0)
+        print("maze generated!")
         
     
     def _create_cells(self):
@@ -23,8 +32,6 @@ class Maze():
         for i in range(len(self._cells)):
             for j in range(len(self._cells[i])):
                  self._draw_cell(i, j)
-
-        self._break_entrance_and_exit()
                  
     
     def _break_entrance_and_exit(self):
@@ -36,7 +43,72 @@ class Maze():
         self._cells[col][row].has_bottom_wall = False
         self._draw_cell(col, row)
         
+
+    def break_walls(self, i, j):
+        cells = self._cells
+        current = self._cells[i][j]
+        current.visited = True
+           
+        to_visit = []
+
+        # check left
+        if i > 0:
+            if not cells[i - 1][j].visited:
+                to_visit.append(("l", (i - 1, j)))
+                
+        # check right
+        if i < len(cells) - 1:
+            if not cells[i + 1][j].visited:
+                to_visit.append(("r", (i + 1, j)))
+
+        # check top
+        if j > 0:
+            if not cells[i][j - 1].visited:
+                to_visit.append(("t", (i, j - 1)))
         
+        # check bottom
+        if j < len(cells[i]) - 1:
+            if not cells[i][j + 1].visited:
+                to_visit.append(("b", (i, j + 1)))
+            
+
+        while len(to_visit) > 0:
+            target = to_visit.pop(random.randint(0, len(to_visit) - 1))
+            target_direction = target[0]
+            target_cell = target[1]
+            
+            if cells[target_cell[0]][target_cell[1]].visited:
+                continue
+            
+            self.break_walls_between_cells((i, j), target_direction, target[1])
+            self.break_walls(target_cell[0], target_cell[1])
+            
+            
+    def break_walls_between_cells(self, cell1_tuple, direction, cell2_tuple):
+        i1, j1 = cell1_tuple
+        cell1 = self._cells[i1][j1]
+        i2, j2 = cell2_tuple
+        cell2 = self._cells[i2][j2]
+
+        match direction:
+            case "l":
+                cell1.has_left_wall = False
+                cell2.has_right_wall = False
+            case "r":
+                cell1.has_right_wall = False
+                cell2.has_left_wall = False
+            case "t":
+                cell1.has_top_wall = False
+                cell2.has_bottom_wall = False
+            case "b":
+                cell1.has_bottom_wall = False
+                cell2.has_top_wall = False
+            case _:
+                raise ValueError(f"'{direction}' is not a valid value.")
+            
+        self._draw_cell(i1, j1)
+        self._draw_cell(i2, j2)
+    
     
     def _draw_cell(self, i, j):
         if self._win is None:
