@@ -1,16 +1,10 @@
 from graphics import *
 from cell import *
+from maze import *
 
 def main():
     win = Window(600, 800)
-    cell = Cell(win)
-    cell.has_right_wall = False
-    cell.draw(100, 100, 200, 200)
-    cell_2 = Cell(win)
-    cell_2.has_left_wall = False
-    cell_2.has_bottom_wall = False
-    cell_2.draw(200, 100, 300, 200)
-    cell.draw_move(cell_2, undo=True)
+    maze = Maze(100, 100, 10, 10, 50, 50, win)
     win.wait_for_close()
 
 
